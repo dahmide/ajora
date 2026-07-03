@@ -1,10 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import { cx, sortCx } from "@/utils/cx";
-import { MastercardIcon, MastercardIconWhite, PaypassIcon } from "./icons";
+import { cn } from "@/lib/utils";
 
-const styles = sortCx({
+const styles = {
     // Normal
     transparent: {
         root: "bg-black/10 bg-linear-to-br from-white/30 to-transparent backdrop-blur-[6px] before:pointer-events-none before:absolute before:inset-0 before:z-1 before:rounded-[inherit] before:mask-linear-135 before:mask-linear-to-white/20 before:ring-1 before:ring-white/30 before:ring-inset",
@@ -101,7 +100,7 @@ const styles = sortCx({
         paypassIcon: "text-white",
         cardTypeRoot: "bg-white/10",
     },
-});
+};
 
 const _NORMAL_TYPES = [
     "transparent",
@@ -193,7 +192,7 @@ export const CreditCard = ({
                 width: `${scaledWidth}px`,
                 height: `${scaledHeight}px`,
             }}
-            className={cx("relative flex", className)}
+            className={cn("relative flex", className)}
         >
             <div
                 style={{
@@ -201,7 +200,7 @@ export const CreditCard = ({
                     width: `${originalWidth}px`,
                     height: `${originalHeight}px`,
                 }}
-                className={cx(
+                className={cn(
                     "absolute top-0 left-0 flex origin-top-left flex-col justify-between overflow-hidden rounded-2xl p-4",
                     styles[type].root
                 )}
@@ -228,7 +227,7 @@ export const CreditCard = ({
 
                 <div className="relative flex items-start justify-between px-1 pt-1">
                     <div
-                        className={cx(
+                        className={cn(
                             "text-md leading-[normal] font-semibold",
                             styles[type].company
                         )}
@@ -236,7 +235,7 @@ export const CreditCard = ({
                         {company}
                     </div>
 
-                    <PaypassIcon className={styles[type].paypassIcon} />
+                    {/* <PaypassIcon className={styles[type].paypassIcon} /> */}
                 </div>
 
                 <div className="relative flex items-end justify-between gap-3">
@@ -246,7 +245,7 @@ export const CreditCard = ({
                                 style={{
                                     wordBreak: "break-word",
                                 }}
-                                className={cx(
+                                className={cn(
                                     "text-xs leading-snug font-semibold tracking-[0.6px] uppercase",
                                     styles[type].footerText
                                 )}
@@ -254,7 +253,7 @@ export const CreditCard = ({
                                 {cardHolder}
                             </p>
                             <p
-                                className={cx(
+                                className={cn(
                                     "ml-auto text-right text-xs leading-[normal] font-semibold tracking-[0.6px] tabular-nums",
                                     styles[type].footerText
                                 )}
@@ -263,7 +262,7 @@ export const CreditCard = ({
                             </p>
                         </div>
                         <div
-                            className={cx(
+                            className={cn(
                                 "text-md leading-[normal] font-semibold tracking-[1px] tabular-nums",
                                 styles[type].footerText
                             )}
@@ -278,11 +277,12 @@ export const CreditCard = ({
                     </div>
 
                     <div
-                        className={cx(
+                        className={cn(
                             "flex h-8 w-11.5 shrink-0 items-center justify-center rounded",
                             styles[type].cardTypeRoot
                         )}
                     >
+                        {/* 
                         {CARD_WITH_COLOR_LOGO.includes(
                             type as (typeof CARD_WITH_COLOR_LOGO)[number]
                         ) ? (
@@ -290,6 +290,7 @@ export const CreditCard = ({
                         ) : (
                             <MastercardIconWhite />
                         )}
+                         */}
                     </div>
                 </div>
             </div>
