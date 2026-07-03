@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
 // 1. Specify protected and public routes
-const secretRoutes = ["/overview"];
-const publicRoutes = ["/signin", "/signup", "/"];
+const secretRoutes = ["/overview", "/"];
+const publicRoutes = ["/signin", "/signup"];
 
 export default async function proxy(req: NextRequest) {
     // 2. Check if the current route is protected or public
