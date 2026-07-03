@@ -1,11 +1,8 @@
-import { passwordSchema } from "./shared.schema";
+import { emailSchema as email, passwordSchema } from "./shared.schema";
 import { z } from "zod";
 
 export const emailSchema = z.object({
-    email: z
-        .string()
-        .min(1, { error: "Email is required" })
-        .pipe(z.email({ error: "Email is invalid" })),
+    email: email,
 });
 
 export const otpSchema = z.object({
@@ -17,14 +14,18 @@ export const otpSchema = z.object({
 
 export const profileSchema = z
     .object({
-        name: z
+        fname: z
+            .string()
+            .min(2, "Name must be at least 2 characters")
+            .max(60, "Name is too long"),
+        lname: z
             .string()
             .min(2, "Name must be at least 2 characters")
             .max(60, "Name is too long"),
         password: passwordSchema,
-        confirmPassword: z.string(),
+        confirm_password: z.string(),
     })
-    .refine((data) => data.password === data.confirmPassword, {
+    .refine((data) => data.password === data.confirm_password, {
         message: "Passwords don't match",
         path: ["confirmPassword"],
     });

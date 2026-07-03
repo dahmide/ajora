@@ -1,51 +1,85 @@
 "use client";
 
-import { startTransition, useActionState, useState } from "react";
+import { startTransition, useActionState, useEffect } from "react";
+import { useForm, type DefaultValues, type FieldValues } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ZodType } from "zod";
 
-type FormErrors = Record<string, string>;
+type FieldErrors = Record<string, string>;
+type FieldError = {
+    message: string;
+    invalid: boolean;
+};
+type EnrichedFieldErrors = Record<string, FieldError>;
+
 type FormAction<TState> = (
     prevData: TState,
     formData: FormData
 ) => TState | Promise<TState>;
 
-type UseFormActionOptions<TState> = {
-    schema: ZodType;
+type UseFormActionOptions<TState, TFields extends FieldValues> = {
     initialState: Awaited<TState>;
+    schema: ZodType<FieldValues["input"], any, FieldValues["output"]>;
+    defaultValues: DefaultValues<TFields["input"]>;
 };
 
-export function useFormAction<TState extends { errors?: FormErrors }>(
+function enrichErrors(raw: FieldErrors): EnrichedFieldErrors {
+    return Object.fromEntries(
+        Object.entries(raw).map(([key, message]) => [
+            key,
+            { message, invalid: true },
+        ])
+    );
+}
+
+export function useFormAction<
+    TState extends { errors?: FieldErrors },
+    TFields extends FieldValues
+>(
     action: FormAction<TState>,
-    { schema, initialState }: UseFormActionOptions<TState>
+    {
+        schema,
+        initialState,
+        defaultValues,
+    }: UseFormActionOptions<TState, TFields>
 ) {
-    const [clientErrors, setClientErrors] = useState<FormErrors>({});
-    const [state, formAction, submitting] = useActionState<TState, FormData>(
-        action,
-        initialState
+    const form = useForm<TFields["input"], any, TFields["output"]>({
+        resolver: zodResolver(schema),
+        defaultValues,
+        mode: "onSubmit",
+    });
+    const [state, formAction, isPending] = useActionState(action, initialState);
+
+    useEffect(() => {
+        if (state?.errors) {
+            for (const [field, message] of Object.entries(state.errors)) {
+                form.setError(field as any, { type: "server", message });
+            }
+        }
+    }, [state, form]);
+
+    const onSubmit = form.handleSubmit((_, event) => {
+        if (event && event.target) {
+            const formData = new FormData(event.target);
+            startTransition(() => formAction(formData));
+        }
+    });
+
+    const errors: EnrichedFieldErrors = enrichErrors(
+        Object.fromEntries(
+            Object.entries(form.formState.errors).map(([key, err]) => [
+                key,
+                (err?.message as string) ?? "Invalid value",
+            ])
+        )
     );
 
-    function onSubmit(e: React.SubmitEvent<HTMLFormElement>) {
-        e.preventDefault();
-
-        const fd = new FormData(e.currentTarget);
-        const values = Object.fromEntries(fd.entries());
-        const result = schema.safeParse(values);
-
-        if (!result.success) {
-            const errors: FormErrors = {};
-            for (const issue of result.error.issues) {
-                const key = issue.path[0] as string;
-                // keep the first error per field, ignore subsequent ones for the same field
-                if (!errors[key]) errors[key] = issue.message;
-            }
-            setClientErrors(errors);
-            return;
-        }
-
-        setClientErrors({});
-        startTransition(() => formAction(fd));
-    }
-
-    const errors: FormErrors = { ...state.errors, ...clientErrors };
-    return { onSubmit, errors, isSubmitting: submitting, state };
+    return {
+        control: form.control,
+        register: form.register,
+        onSubmit,
+        errors,
+        isSubmitting: isPending,
+        state,
+    };
 }

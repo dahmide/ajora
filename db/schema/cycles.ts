@@ -1,6 +1,8 @@
 import { pgTable, text, integer, timestamp } from "drizzle-orm/pg-core";
 import { groups } from "./groups";
 import { members } from "./members";
+import { relations } from "drizzle-orm";
+import { contributions } from "./contributions";
 
 export const cycles = pgTable("cycles", {
     id: text("id").primaryKey(),
@@ -16,3 +18,15 @@ export const cycles = pgTable("cycles", {
     status: text("status").notNull().default("active"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const cyclesRelations = relations(cycles, ({ one, many }) => ({
+    group: one(groups, {
+        fields: [cycles.groupId],
+        references: [groups.id],
+    }),
+    recipient: one(members, {
+        fields: [cycles.recipientId],
+        references: [members.id],
+    }),
+    contributions: many(contributions),
+}));

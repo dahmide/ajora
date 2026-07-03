@@ -1,6 +1,7 @@
 import { pgTable, text, real, timestamp } from "drizzle-orm/pg-core";
 import { members } from "./members";
 import { cycles } from "./cycles";
+import { relations } from "drizzle-orm";
 
 export const contributions = pgTable("contributions", {
     id: text("id").primaryKey(),
@@ -18,3 +19,14 @@ export const contributions = pgTable("contributions", {
     paidAt: timestamp("paid_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const contributionsRelations = relations(contributions, ({ one }) => ({
+    member: one(members, {
+        fields: [contributions.memberId],
+        references: [members.id],
+    }),
+    cycle: one(cycles, {
+        fields: [contributions.cycleId],
+        references: [cycles.id],
+    }),
+}));
