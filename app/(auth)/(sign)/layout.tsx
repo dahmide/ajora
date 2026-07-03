@@ -10,7 +10,7 @@ export default function SignLayout({
             <div className="flex flex-col">
                 <header></header>
                 <div className="flex flex-1 items-center justify-center">
-                    <div className="w-full max-w-md">{children}</div>
+                    <div className="w-full max-w-sm md:max-w-md">{children}</div>
                 </div>
                 <footer></footer>
             </div>
